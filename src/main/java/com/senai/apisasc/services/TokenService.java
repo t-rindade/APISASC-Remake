@@ -3,6 +3,8 @@ package com.senai.apisasc.services;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.senai.apisasc.models.FuncionarioModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,10 @@ public class TokenService {
                     .withClaim("id", funcionario.getId().toString())
                     .withExpiresAt(gerarValidadeToken())
                     .sign(algoritmo);
+
+            // Log the generated token
+            System.out.println("Generated token: " + token);
+
             return token;
         } catch (JWTCreationException exception) {
             throw new RuntimeException("Erro", exception);
@@ -33,16 +39,24 @@ public class TokenService {
 
     public String validarToken(String token){
         try {
-            Algorithm algoritimo = Algorithm.HMAC256(secret);
-            return JWT.require(algoritimo)
+            if (token == null || token.isEmpty()) {
+                throw new IllegalArgumentException("Token is null or empty");
+            }
+
+            Algorithm algoritmo = Algorithm.HMAC256(secret);
+            DecodedJWT jwt = JWT.require(algoritmo)
                     .withIssuer("apisasc")
                     .build()
-                    .verify(token)
-                    .getSubject();
-        } catch (JWTCreationException exception){
+                    .verify(token);
+
+            return jwt.getSubject();
+        } catch (JWTVerificationException | IllegalArgumentException exception){
+            // Log the exception for debugging purposes
+            exception.printStackTrace();
             throw new RuntimeException(exception);
         }
     }
+
 
     private Instant gerarValidadeToken() {
         return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));

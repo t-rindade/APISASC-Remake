@@ -11,7 +11,7 @@
 	<groupId>com.senai</groupId>
 	<artifactId>apisasc</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>apisasc</name>
 	<description>api sasc</description>
 	<properties>
